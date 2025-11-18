@@ -1,5 +1,5 @@
 
-import  { useState } from 'react';
+import { useState } from 'react';
 import './App.css';
 
 
@@ -21,7 +21,7 @@ const VIDEOS = [
   '/video/kegel4.mp4',
   '/video/latpullDown.mp4',
   '/video/plank.mp4',
-  '/video/pullups.mp4',
+  '/video/pullUps.mp4',
   '/video/shoulder.mp4',
   '/video/sittedRow.mp4',
   '/video/thighs-bicep.mp4',
@@ -32,6 +32,15 @@ const VIDEOS = [
 function App() {
   const [currentPage, setCurrentPage] = useState('main');
   const [modalImage, setModalImage] = useState(null);
+
+  const cleanFileName = (fullPath) => {
+
+    let withoutExtension = fullPath.substring(0, fullPath.lastIndexOf('.'));
+
+    let baseFileName = withoutExtension.substring(withoutExtension.lastIndexOf('/') + 1);
+
+    return baseFileName;
+  }
 
   return (
     <div className="app">
@@ -252,12 +261,14 @@ function App() {
               </p>
             ) : (
               IMAGES.map((img, index) => (
+
                 <div
                   key={index}
                   className="gallery-item"
                   onClick={() => setModalImage(img)}
                 >
                   <img src={img} alt={`Progress ${index + 1}`} />
+                  <h1>{cleanFileName(img)}</h1>
                 </div>
               ))
             )}
@@ -279,8 +290,10 @@ function App() {
               </p>
             ) : (
               VIDEOS.map((vid, index) => (
+
                 <div key={index} className="video-item">
                   <video src={vid} controls preload="metadata" />
+                  <h1>{cleanFileName(vid)}</h1>
                 </div>
               ))
             )}
