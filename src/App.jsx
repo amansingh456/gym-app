@@ -86,7 +86,7 @@ function App() {
           <div className="card gradient-2">
             <div className="card-header">
               <h2 className="card-title">Day 1 — Monday</h2>
-              <span className="badge pink">Chest + Triceps</span>
+              <span className="badge pink">Back</span>
             </div>
             <table>
               <thead>
@@ -97,12 +97,9 @@ function App() {
                 </tr>
               </thead>
               <tbody>
-                <tr><td>Chest</td><td>Bench Press</td><td>4 × 10</td></tr>
-                <tr><td></td><td>Incline Dumbbell Press</td><td>4 × 12</td></tr>
-                <tr><td></td><td>Chest Fly</td><td>3 × 15</td></tr>
-                <tr><td>Triceps</td><td>Tricep Pushdown</td><td>4 × 12</td></tr>
-                <tr><td></td><td>Incline Overhead Dumbbell Ext</td><td>3 × 12</td></tr>
-                <tr><td></td><td>Bench Dip</td><td>3 × 12</td></tr>
+                <tr><td>Back</td><td>Lat Pulldown</td><td>4 × 12</td></tr>
+                <tr><td></td><td>Seated Row</td><td>4 × 12</td></tr>
+                <tr><td></td><td>Deadlift</td><td>3 × 8</td></tr>
               </tbody>
             </table>
           </div>
@@ -113,29 +110,7 @@ function App() {
               <div className="card-header">
                 <div>
                   <h2 className="card-title">Day 2 — Tuesday</h2>
-                  <span className="badge cyan">Back + Biceps</span>
-                </div>
-              </div>
-              <table>
-                <thead>
-                  <tr><th>Muscle</th><th>Exercise</th><th>Sets × Reps</th></tr>
-                </thead>
-                <tbody>
-                  <tr><td>Back</td><td>Lat Pulldown</td><td>4 × 12</td></tr>
-                  <tr><td></td><td>Seated Row</td><td>4 × 12</td></tr>
-                  <tr><td></td><td>Deadlift</td><td>3 × 8</td></tr>
-                  <tr><td>Biceps</td><td>Barbell Curl</td><td>3 × 12</td></tr>
-                  <tr><td></td><td>Hammer Curl</td><td>3 × 12</td></tr>
-                  <tr><td></td><td>Cable Curl</td><td>2 × 15</td></tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div className="card gradient-4">
-              <div className="card-header">
-                <div>
-                  <h2 className="card-title">Day 3 — Wednesday</h2>
-                  <span className="badge green">Shoulders + Triceps</span>
+                  <span className="badge cyan">Shoulder</span>
                 </div>
               </div>
               <table>
@@ -146,8 +121,25 @@ function App() {
                   <tr><td>Shoulders</td><td>Dumbbell Shoulder Press</td><td>4 × 10</td></tr>
                   <tr><td></td><td>Side Lateral Raise</td><td>4 × 15</td></tr>
                   <tr><td></td><td>Front Raise</td><td>3 × 12</td></tr>
-                  <tr><td>Triceps</td><td>Tricep Pushdown</td><td>4 × 12</td></tr>
-                  <tr><td></td><td>Bench Dip</td><td>3 × 12</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="card gradient-4">
+              <div className="card-header">
+                <div>
+                  <h2 className="card-title">Day 3 — Wednesday</h2>
+                  <span className="badge green">Chest</span>
+                </div>
+              </div>
+              <table>
+                <thead>
+                  <tr><th>Muscle</th><th>Exercise</th><th>Sets × Reps</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Chest</td><td>Bench Press</td><td>4 × 10</td></tr>
+                  <tr><td></td><td>Incline Dumbbell Press</td><td>4 × 12</td></tr>
+                  <tr><td></td><td>Chest Fly</td><td>3 × 15</td></tr>
                 </tbody>
               </table>
             </div>
@@ -159,7 +151,7 @@ function App() {
               <div className="card-header">
                 <div>
                   <h2 className="card-title">Day 4 — Thursday</h2>
-                  <span className="badge pink">Legs + Biceps</span>
+                  <span className="badge pink">Tri + Biceps</span>
                 </div>
               </div>
               <table>
@@ -167,10 +159,9 @@ function App() {
                   <tr><th>Muscle</th><th>Exercise</th><th>Sets × Reps</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td>Legs</td><td>Squats</td><td>4 × 10</td></tr>
-                  <tr><td></td><td>Leg Press</td><td>4 × 12</td></tr>
-                  <tr><td></td><td>Leg Extension</td><td>3 × 15</td></tr>
-                  <tr><td></td><td>Lunges</td><td>2 × 12</td></tr>
+                  <tr><td>Triceps</td><td>Tricep Pushdown</td><td>4 × 12</td></tr>
+                  <tr><td></td><td>Incline Overhead Dumbbell Ext</td><td>3 × 12</td></tr>
+                  <tr><td></td><td>Bench Dip</td><td>3 × 12</td></tr>
                   <tr><td>Biceps</td><td>Barbell Curl</td><td>3 × 12</td></tr>
                   <tr><td></td><td>Hammer Curl</td><td>3 × 12</td></tr>
                   <tr><td></td><td>Cable Curl</td><td>2 × 15</td></tr>
@@ -182,7 +173,7 @@ function App() {
               <div className="card-header">
                 <div>
                   <h2 className="card-title">Day 5 — Friday</h2>
-                  <span className="badge purple">Chest + Back</span>
+                  <span className="badge purple">Legs</span>
                 </div>
               </div>
               <table>
@@ -190,12 +181,10 @@ function App() {
                   <tr><th>Muscle</th><th>Exercise</th><th>Sets × Reps</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td>Chest</td><td>Bench Press</td><td>4 × 10</td></tr>
-                  <tr><td></td><td>Incline Dumbbell Press</td><td>4 × 12</td></tr>
-                  <tr><td></td><td>Chest Fly</td><td>3 × 15</td></tr>
-                  <tr><td>Back</td><td>Lat Pulldown</td><td>4 × 12</td></tr>
-                  <tr><td></td><td>Seated Row</td><td>4 × 12</td></tr>
-                  <tr><td></td><td>Deadlift</td><td>3 × 8</td></tr>
+                  <tr><td>Legs</td><td>Squats</td><td>4 × 10</td></tr>
+                  <tr><td></td><td>Leg Press</td><td>4 × 12</td></tr>
+                  <tr><td></td><td>Leg Extension</td><td>3 × 15</td></tr>
+                  <tr><td></td><td>Lunges</td><td>2 × 12</td></tr>
                 </tbody>
               </table>
             </div>
