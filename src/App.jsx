@@ -26,7 +26,18 @@ const VIDEOS = [
   '/video/sittedRow.mp4',
   '/video/thighs-bicep.mp4',
   '/video/tri.mp4',
-  '/video/warmUp-Legs.mp4'
+  '/video/warmUp-Legs.mp4',
+  '/video/abs3.mp4',
+  '/video/abs4.mp4',
+  '/video/abs5.mp4',
+  '/video/cardio.mp4',
+  '/video/dips.mp4',
+  '/video/pullUps2.mp4',
+  '/video/pullUps3.mp4',
+  '/video/pushup.mp4',
+  '/video/sets50.mp4',
+  '/video/warmup2.mp4',
+
 ];
 
 function App() {
