@@ -75,6 +75,33 @@ function App() {
             </div>
           </div>
 
+
+          <div className="card">
+            <div className="card-header">
+              <div>
+                <h2 className="card-title">New Excersice routine</h2>
+                {/* <p className="hint">Complete before every training session</p> */}
+              </div>
+            </div>
+            <div className="warmup-grid">
+              <div className="warmup-item">100 Jumping Jacks</div>
+              <div className="warmup-item">100 High Knees</div>
+              <div className="warmup-item">100 wall support climb</div>
+              <div className="warmup-item">50 Lunges</div>
+              <div className="warmup-item">50 Pushups</div>
+              <div className="warmup-item">50 Hanuman Dand</div>
+              <div className="warmup-item">50 Squats</div>
+              <div className="warmup-item">50 Squats</div>
+            </div>
+
+            <div className="warmup-grid">
+              <div className="warmup-item">Plank 2 mint</div>
+              <div className="warmup-item">Kegel 3 excercise</div>
+              <div className="warmup-item">Leg raises</div>
+              <div className="warmup-item">Crunches</div>
+            </div>
+          </div>
+
           {/* Warm-up Section */}
           <div className="card">
             <div className="card-header">
