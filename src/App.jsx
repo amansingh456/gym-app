@@ -76,6 +76,33 @@ function App() {
           </div>
 
 
+
+        <div className="card">
+            <div className="card-header">
+              <div>
+                <h2 className="card-title">Calisthenics routine</h2>
+                {/* <p className="hint">Complete before every training session</p> */}
+              </div>
+            </div>
+            <div className="warmup-grid">
+              <div className="warmup-item">300 Jumping Jacks</div>
+              <div className="warmup-item">150 High Knees</div>
+              <div className="warmup-item">30 Pushups</div>
+              <div className="warmup-item">50 Squats</div>
+ 
+            </div>
+
+            <div className="warmup-grid">
+              <div className="warmup-item">10 Pushups * 15 leg-raises  * 20 sec hollow hold * 40 mountain climbing * Plank 1 mint ( *3 )</div>
+              <div className="warmup-item">Kegel 3 excercise</div>
+              <div className="warmup-item">cat nd cow (10 * 3)</div>
+              <div className="warmup-item">100 wall support climb</div>
+              <div className="warmup-item">wall sitting (ref wall video)</div>
+            </div>
+          </div>
+
+
+
           <div className="card">
             <div className="card-header">
               <div>
