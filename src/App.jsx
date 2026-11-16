@@ -1,289 +1,228 @@
-
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import './App.css';
+import { useStored } from './lib/useStored';
+import { useToday } from './lib/useToday';
+import { addDays, programWeek, weekdayIndex } from './lib/dates';
+import { DEFAULT_HABITS, PROFILE, VIDEOS, WATER, habitsForDay, phaseForWeek, workoutFor } from './data/program';
+import TodayView from './components/TodayView';
+import PlanView from './components/PlanView';
+import DietView from './components/DietView';
+import ProgressView from './components/ProgressView';
+import MediaView from './components/MediaView';
+import Modal from './components/Modal';
+import ExerciseDemo from './components/ExerciseDemo';
+import VideoPlayer from './components/VideoPlayer';
+import RestTimer from './components/RestTimer';
 
-
-const IMAGES = [
-  '/image/general.jpeg',
-  '/image/hair.jpeg',
-  '/image/latpulldown.jpeg',
-  '/image/trademil.jpeg',
+const TABS = [
+  { id: 'today', label: 'Today', icon: 'M12 3v3M12 18v3M3 12h3M18 12h3M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8z' },
+  { id: 'plan', label: 'Plan', icon: 'M4 6h16M4 12h16M4 18h10' },
+  { id: 'diet', label: 'Diet', icon: 'M12 3c4 4 6 7 6 10a6 6 0 0 1-12 0c0-3 2-6 6-10z' },
+  { id: 'progress', label: 'Progress', icon: 'M4 18l5-6 4 3 7-9' },
+  { id: 'media', label: 'Media', icon: 'M5 5h14v14H5zM10 9v6l5-3z' },
 ];
 
-const VIDEOS = [
-  '/video/abs.mp4',
-  '/video/benchPress.mp4',
-  '/video/hanuman-dand.mp4',
-  '/video/kegel2.mp4',
-  '/video/kegel3.mp4',
-  '/video/kegel4.mp4',
-  '/video/latpullDown.mp4',
-  '/video/plank.mp4',
-  '/video/pullUps.mp4',
-  '/video/shoulder.mp4',
-  '/video/sittedRow.mp4',
-  '/video/tri.mp4',
-  '/video/abs3.mp4',
-  '/video/cardio.mp4',
-  '/video/dips.mp4',
-  '/video/pullUps2.mp4',
-  '/video/pullUps3.mp4',
-  '/video/pushup.mp4',
-];
+const EMPTY_LOG = { habits: {}, sets: {}, water: 0 };
 
-function App() {
-  const [currentPage, setCurrentPage] = useState('main');
-  const [modalImage, setModalImage] = useState(null);
+function readHash() {
+  const h = window.location.hash.replace('#', '');
+  return TABS.some((t) => t.id === h) ? h : 'today';
+}
 
-  const cleanFileName = (fullPath) => {
+export default function App() {
+  const today = useToday();
+  const [tab, setTab] = useState(readHash);
+  const [settings, setSettings] = useStored('cut8.settings', () => ({
+    startDate: today,
+    startWeight: PROFILE.startWeight,
+    goalWeight: PROFILE.goalWeight,
+  }));
+  const [habits, setHabits] = useStored('cut8.habits', DEFAULT_HABITS);
+  const [logs, setLogs] = useStored('cut8.log', {});
+  const [weights, setWeights] = useStored('cut8.weights', []);
+  const [modal, setModal] = useState(null);
+  const [rest, setRest] = useState(null);
+  const [mediaTab, setMediaTab] = useState('videos');
+  const [videoIndex, setVideoIndex] = useState(0);
 
-    let withoutExtension = fullPath.substring(0, fullPath.lastIndexOf('.'));
+  useEffect(() => {
+    const onHash = () => setTab(readHash());
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
 
-    let baseFileName = withoutExtension.substring(withoutExtension.lastIndexOf('/') + 1);
+  const go = (id) => {
+    window.location.hash = id;
+    setTab(id);
+    window.scrollTo({ top: 0 });
+  };
 
-    return baseFileName;
-  }
+  const week = programWeek(settings.startDate, today);
+  const phase = phaseForWeek(week);
+  const todayIdx = weekdayIndex(today);
+  const workout = workoutFor(todayIdx, Math.min(week, 8));
+  const nextWorkout = workoutFor((todayIdx + 1) % 7, Math.min(week, 8));
+  const todaysHabits = habitsForDay(habits, workout.rest);
+  const log = logs[today] || EMPTY_LOG;
+
+  // Every change goes through here, keyed by today's date. A new date means a fresh, empty log.
+  const updateLog = useCallback((fn) => {
+    setLogs((all) => {
+      const cur = all[today] || EMPTY_LOG;
+      return { ...all, [today]: fn({ habits: { ...cur.habits }, sets: { ...cur.sets }, water: cur.water || 0 }) };
+    });
+  }, [setLogs, today]);
+
+  const toggleHabit = (id) => updateLog((l) => ({ ...l, habits: { ...l.habits, [id]: !l.habits[id] } }));
+
+  const setWater = (n) => updateLog((l) => ({ ...l, water: n, habits: { ...l.habits, water: n >= WATER.doneAt } }));
+
+  const setSet = (item, n) => {
+    const prev = log.sets?.[item.id] || 0;
+    updateLog((l) => {
+      const allDone = (s) => workout.items.every((it) => (s[it.id] || 0) >= it.sets);
+      const sets = { ...l.sets, [item.id]: n };
+      const wasAll = allDone(l.sets);
+      const nowAll = allDone(sets);
+      // Tick the session habit when every set is logged; untick only if we were the ones who ticked it.
+      let workoutDone = l.habits.workout;
+      if (nowAll) workoutDone = true;
+      else if (wasAll) workoutDone = false;
+      return { ...l, sets, habits: { ...l.habits, workout: workoutDone } };
+    });
+    if (n > prev && item.kind === 'strength' && n < item.sets && item.rest) {
+      const now = Date.now();
+      setRest({ seconds: item.rest, endsAt: now + item.rest * 1000, label: item.name, nonce: now });
+    }
+  };
+
+  const logWeight = (kg) => {
+    setWeights((ws) => [...ws.filter((w) => w.date !== today), { date: today, kg }]);
+    updateLog((l) => ({ ...l, habits: { ...l.habits, weigh: true } }));
+  };
+
+  const deleteWeight = (date) => setWeights((ws) => ws.filter((w) => w.date !== date));
+
+  const addHabit = (label) => setHabits((hs) => [...hs, { id: `c${Date.now()}`, label, group: 'Custom' }]);
+  const removeHabit = (id) => setHabits((hs) => hs.filter((h) => h.id !== id));
+  const restoreHabits = () => setHabits(DEFAULT_HABITS);
+
+  // Score a day against the habits that applied that day (no gym habits on Mondays).
+  const scoreFor = useCallback((key) => {
+    const l = logs[key];
+    const list = habitsForDay(habits, weekdayIndex(key) === 0);
+    if (!l || !list.length) return 0;
+    return list.filter((h) => l.habits?.[h.id]).length / list.length;
+  }, [logs, habits]);
+
+  // A day counts toward the streak at 80% of habits. Today only counts once it qualifies.
+  const { streak, best } = useMemo(() => {
+    const ok = (k) => scoreFor(k) >= 0.8;
+    let s = 0;
+    let k = ok(today) ? today : addDays(today, -1);
+    while (ok(k) && s < 1000) {
+      s += 1;
+      k = addDays(k, -1);
+    }
+    let run = 0;
+    let top = 0;
+    let prevKey = null;
+    Object.keys(logs).sort().forEach((key) => {
+      if (ok(key)) {
+        run = prevKey && addDays(prevKey, 1) === key ? run + 1 : 1;
+        prevKey = key;
+        top = Math.max(top, run);
+      } else {
+        run = 0;
+        prevKey = null;
+      }
+    });
+    return { streak: s, best: Math.max(top, s) };
+  }, [logs, scoreFor, today]);
+
+  const openDemo = (ex) => setModal({ type: 'demo', ex });
+  const openVideo = (id) => {
+    const i = VIDEOS.findIndex((v) => v.id === id);
+    if (i >= 0) setModal({ type: 'video', index: i });
+  };
+  const closeModal = useCallback(() => setModal(null), []);
 
   return (
     <div className="app">
-      {/* Main Page */}
-      {currentPage === 'main' && (
-        <div className="container">
-          <div className="header">
-            <h1 className="main-title" contentEditable suppressContentEditableWarning>
-              Premium Gym Plan
-            </h1>
-            <p className="subtitle" contentEditable suppressContentEditableWarning>
-              12-Week Transformation • 5 Strength Days + Weekend Cardio
-            </p>
-            <div className="nav-buttons">
-              <button className="nav-btn img-btn" onClick={() => setCurrentPage('images')}>
-                📷 Images
-              </button>
-              <button className="nav-btn vid-btn" onClick={() => setCurrentPage('videos')}>
-                🎥 Videos
-              </button>
-            </div>
-          </div>
+      <header className="topbar">
+        <a className="brand" href="#today" onClick={(e) => { e.preventDefault(); go('today'); }}>
+          <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
+            <circle cx="16" cy="16" r="13" className="brand-ring" />
+            <path d="M16 3a13 13 0 0 1 12.4 9" className="brand-arc" />
+            <circle cx="16" cy="16" r="4" className="brand-core" />
+          </svg>
+          <span className="brand-text">
+            <strong>Cut 8</strong>
+            <span>{settings.startWeight} to {settings.goalWeight} kg</span>
+          </span>
+        </a>
+        <nav className="tabs" aria-label="Sections">
+          {TABS.map((t) => (
+            <button key={t.id} className={tab === t.id ? 'tab on' : 'tab'} onClick={() => go(t.id)} aria-current={tab === t.id ? 'page' : undefined}>
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d={t.icon} /></svg>
+              <span>{t.label}</span>
+            </button>
+          ))}
+        </nav>
+      </header>
 
-
-
-        <div className="card">
-            <div className="card-header">
-              <div>
-                <h2 className="card-title">Saturday & Sunday</h2>
-              </div>
-            </div>
-            <div className="warmup-grid">
-              <div className="warmup-item">300 Jumping Jacks</div>
-              <div className="warmup-item">150 High Knees</div>
-              <div className="warmup-item">50 Pushups</div>
-              <div className="warmup-item">50 Squats</div>
-              <div className="warmup-item">Few Pullups</div>
-
-            </div>
-
-            <div className="warmup-grid">
-              <div className="warmup-item">10 Pushups * 15 leg-raises  * 20 sec hollow hold * 40 mountain climbing * Plank 1 mint ( *3 )</div>
-            </div>
-          </div>  
-
-
-
-          <div className="card">
-            <div className="card-header">
-              <div>
-                <h2 className="card-title">Warm Up</h2>
-              </div>
-            </div>
-            <div className="warmup-grid">
-              <div className="warmup-item">100 Jumping Jacks</div>
-              <div className="warmup-item">100 High Knees</div>
-              <div className="warmup-item">50 Pushups</div>
-              <div className="warmup-item">50 Squats</div>
-              <div className="warmup-item">Few Pullups</div>
-            </div>
-          </div>
-
-          {/* Warm-up Section */}
-          <div className="card">
-            <div className="card-header">
-              <div>
-                <h2 className="card-title">After Excersice</h2>
-              </div>
-            </div>
-            <div className="warmup-grid">
-              <div className="warmup-item">Crunches - 15*3</div>
-              <div className="warmup-item">Russian Twister - 15*3</div>
-              <div className="warmup-item">Leg Raises - 15*3</div>
-              <div className="warmup-item">Plank - 40 sec * 3</div>
-              <div className="warmup-item">Kegel - (Hanuman Dand, Lunges, Reverse Hip thrust, Knee Support Pelvic press, Butterfly)</div>
-              <div className="warmup-item">Cat & Camel</div>
-            </div>
-          </div>
-
-          {/* Day 1 */}
-          <div className="card gradient-2">
-            <div className="card-header">
-              <h2 className="card-title">Day 1 — Tuesday</h2>
-              <span className="badge pink">Back & Tricep</span>
-            </div>
-            <table>
-              <thead>
-                <tr>
-                  <th>Muscle</th>
-                  <th>Exercise</th>
-                  <th>Sets × Reps</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>Back</td><td>Bench Press</td><td>4 × 10</td></tr>
-                <tr><td></td><td>Incline Bench Press</td><td>4 × 12</td></tr>
-                <tr><td></td><td>Chest Fly</td><td>3 × 8</td></tr>
-              </tbody>
-              <tbody>
-                <tr><td>Tricep</td><td>Bench Dip</td><td>4 × 10</td></tr>
-                <tr><td></td><td>Overhead Tricep Extension</td><td>4 × 12</td></tr>
-                <tr><td></td><td>Tricep Cable Extension</td><td>3 × 8</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          {/* Day 2 & 3 Grid */}
-          <div className="grid">
-            <div className="card gradient-3">
-              <div className="card-header">
-                <div>
-                  <h2 className="card-title">Day 2 — Wednesday</h2>
-                  <span className="badge cyan">Back & Biceps</span>
-                </div>
-              </div>
-              <table>
-                <thead>
-                  <tr><th>Muscle</th><th>Exercise</th><th>Sets × Reps</th></tr>
-                </thead>
-                <tbody>
-                  <tr><td>Back</td><td>Dumbbell Shoulder Press</td><td>4 × 10</td></tr>
-                  <tr><td></td><td>Side Lateral Raise</td><td>4 × 15</td></tr>
-                  <tr><td></td><td>Front Raise</td><td>3 × 12</td></tr>
-                   <tr><td>Biceps</td><td>Barbell Curl</td><td>3 × 12</td></tr>
-                  <tr><td></td><td>Hammer Curl</td><td>3 × 12</td></tr>
-                  <tr><td></td><td>Cable Curl</td><td>2 × 15</td></tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div className="card gradient-4">
-              <div className="card-header">
-                <div>
-                  <h2 className="card-title">Day 3 — Thursday</h2>
-                  <span className="badge green">Shoulders & Legs</span>
-                </div>
-              </div>
-              <table>
-                <thead>
-                  <tr><th>Muscle</th><th>Exercise</th><th>Sets × Reps</th></tr>
-                </thead>
-                <tbody>
-                  <tr><td>Shoulders</td><td>Dumbbell Shoulder Press</td><td>4 × 10</td></tr>
-                  <tr><td></td><td>Side Lateral Raise</td><td>4 × 15</td></tr>
-                  <tr><td></td><td>Front Raise</td><td>3 × 12</td></tr>
-
-                  <tr><td>Legs</td><td>Squats</td><td>4 × 10</td></tr>
-                  <tr><td></td><td>Leg Press</td><td>4 × 12</td></tr>
-                  <tr><td></td><td>Leg Extension</td><td>3 × 15</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Images Page */}
-      {currentPage === 'images' && (
-        <div className="container">
-          <button className="back-btn" onClick={() => setCurrentPage('main')}>
-            ← Back to Home
-          </button>
-          <h1 className="page-title">📷 Progress Images</h1>
-          <div className="gallery-container">
-            {IMAGES.length === 0 ? (
-              <p style={{ textAlign: 'center', color: 'var(--muted)', gridColumn: '1/-1' }}>
-                No images yet. Add images to public/images/ folder
-              </p>
-            ) : (
-              IMAGES.map((img, index) => (
-
-                <div
-                  key={index}
-                  className="gallery-item"
-                  onClick={() => setModalImage(img)}
-                >
-                  <img src={img} alt={`Progress ${index + 1}`} />
-                  <h1>{cleanFileName(img)}</h1>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Videos Page */}
-      {currentPage === 'videos' && (
-        <div className="container">
-          <button className="back-btn" onClick={() => setCurrentPage('main')}>
-            ← Back to Home
-          </button>
-          <h1 className="page-title">🎥 Workout Videos</h1>
-          <div className="gallery-container">
-            {VIDEOS.length === 0 ? (
-              <p style={{ textAlign: 'center', color: 'var(--muted)', gridColumn: '1/-1' }}>
-                No videos yet. Add videos to public/videos/ folder
-              </p>
-            ) : (
-              VIDEOS.map((vid, index) => (
-
-                <div key={index} className="video-item">
-                  <video src={vid} controls preload="metadata" />
-                  <h1>{cleanFileName(vid)}</h1>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Image Modal */}
-      {modalImage && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.95)',
-            zIndex: 9999,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-          }}
-          onClick={() => setModalImage(null)}
-        >
-          <img
-            src={modalImage}
-            alt="Full view"
-            style={{
-              maxWidth: '90%',
-              maxHeight: '90%',
-              borderRadius: '12px',
-            }}
+      <main className="main">
+        {tab === 'today' && (
+          <TodayView
+            today={today}
+            week={week}
+            phase={phase}
+            workout={workout}
+            next={nextWorkout}
+            habits={todaysHabits}
+            log={log}
+            streak={streak}
+            onToggle={toggleHabit}
+            onWater={setWater}
+            onAdd={addHabit}
+            onRemove={removeHabit}
+            onRestore={restoreHabits}
+            onSet={setSet}
+            onDemo={openDemo}
           />
-        </div>
+        )}
+        {tab === 'plan' && <PlanView currentWeek={week} todayIdx={todayIdx} onDemo={openDemo} />}
+        {tab === 'diet' && <DietView />}
+        {tab === 'progress' && (
+          <ProgressView
+            key={today}
+            settings={settings}
+            onSettings={setSettings}
+            weights={weights}
+            onLogWeight={logWeight}
+            onDeleteWeight={deleteWeight}
+            today={today}
+            scoreFor={scoreFor}
+            streak={streak}
+            best={best}
+          />
+        )}
+        {tab === 'media' && (
+          <MediaView tab={mediaTab} onTab={setMediaTab} videoIndex={videoIndex} onVideoIndex={setVideoIndex} onLocalVideo={openVideo} />
+        )}
+      </main>
+
+      {modal?.type === 'demo' && (
+        <Modal title={modal.ex.name} onClose={closeModal} wide>
+          <ExerciseDemo ex={modal.ex} onLocalVideo={openVideo} />
+        </Modal>
       )}
+      {modal?.type === 'video' && (
+        <Modal title={VIDEOS[modal.index].title} onClose={closeModal} wide>
+          <VideoPlayer items={VIDEOS} index={modal.index} onIndex={(i) => setModal({ type: 'video', index: i })} autoPlay />
+        </Modal>
+      )}
+      {rest && <RestTimer key={rest.nonce} request={rest} onClose={() => setRest(null)} />}
     </div>
   );
 }
-
-export default App;

@@ -1,16 +1,20 @@
-# React + Vite
+# Cut 8: 8-week fat loss tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite. No new dependencies, so your existing `node_modules` works.
 
-Currently, two official plugins are available:
+## Install the update
+1. Copy `src/`, `index.html` and `public/exercise/` from this zip into your project (replace the old `src` folder).
+2. Keep your `public/video` and `public/image` folders as they are.
+3. `npm run dev`
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## What's where
+- `src/data/program.js`: exercises, sets, reps, diet, default habits, video and photo lists. Edit here.
+- `public/exercise/*.gif`: demo GIFs, built from the public-domain Free Exercise DB.
+- YouTube Shorts per exercise are in the `YT` list at the bottom of `src/data/program.js`. Swap any video by pasting a new 11-character ID.
+- Your data (checklist, sets, water, weights) is saved in the browser on that device.
 
-## React Compiler
+## Daily checklist
+Keyed by date, so it starts empty every day at midnight. Past days feed the streak and the heatmap on the Progress tab.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Video player shortcuts
+Space play/pause, arrows skip 5 s, `,` and `.` step one frame, `F` full screen. Use "Set loop start / end" to repeat one rep, and "Mirror" to match your own camera view.
