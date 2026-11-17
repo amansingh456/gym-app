@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LIBRARY, PHOTOS, VIDEOS, gifSrc } from '../data/program';
+import { LIBRARY, PHOTOS, VIDEOS, thumbSrc } from '../data/program';
 import VideoPlayer from './VideoPlayer';
 import ExerciseDemo from './ExerciseDemo';
 
@@ -53,7 +53,7 @@ export default function MediaView({ tab, onTab, videoIndex, onVideoIndex, onLoca
             {LIBRARY.map((e) => (
               <button key={e.id} role="listitem" className={e.id === exId ? 'lib-card on' : 'lib-card'}
                 onClick={() => { setExId(e.id); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-                {e.gif && <img src={gifSrc(e.gif)} alt="" loading="lazy" />}
+                {thumbSrc(e) && <img src={thumbSrc(e)} alt="" loading="lazy" />}
                 <span>{e.name}</span>
               </button>
             ))}

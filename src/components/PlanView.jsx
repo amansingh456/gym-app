@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PHASES, SCHEDULE, phaseForWeek, workoutFor } from '../data/program';
+import { PHASES, SCHEDULE, phaseForWeek, plankSeconds, workoutFor } from '../data/program';
 import WorkoutTracker from './WorkoutTracker';
 
 export default function PlanView({ currentWeek, todayIdx, onDemo }) {
@@ -14,7 +14,7 @@ export default function PlanView({ currentWeek, todayIdx, onDemo }) {
         <header className="panel-head">
           <div>
             <h2>8-week timeline</h2>
-            <p className="sub">Pick a week to see its sets. You’re in week {Math.min(currentWeek, 8)}.</p>
+            <p className="sub">Same exercises every week. Weights go up each phase and the plank gets 10 s longer each week. You’re in week {Math.min(currentWeek, 8)}.</p>
           </div>
         </header>
         <div className="timeline" role="tablist" aria-label="Program week">
@@ -38,7 +38,7 @@ export default function PlanView({ currentWeek, todayIdx, onDemo }) {
           ))}
         </div>
         <div className="phase-copy">
-          <p><strong>{phase.name}, week {week}.</strong> {phase.effort}.</p>
+          <p><strong>{phase.name}, week {week}.</strong> {phase.effort}. Plank: {plankSeconds(week)} s.</p>
           <p className="dim">{phase.note}</p>
         </div>
       </section>
@@ -60,7 +60,6 @@ export default function PlanView({ currentWeek, todayIdx, onDemo }) {
 
       <WorkoutTracker
         workout={workout}
-        week={week}
         sets={{}}
         editable={false}
         title={`${SCHEDULE[day].full}: ${workout.title}`}

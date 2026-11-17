@@ -67,7 +67,6 @@ export default function TodayView({
         />
         <WorkoutTracker
           workout={workout}
-          week={week}
           sets={sets}
           onSet={onSet}
           onDemo={onDemo}

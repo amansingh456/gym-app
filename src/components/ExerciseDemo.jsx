@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { YT, gifSrc } from '../data/program';
+import { YT, dose, gifSrc } from '../data/program';
 
 // Real demo for one exercise: looping GIF, numbered cues, and embedded YouTube Shorts.
 export default function ExerciseDemo({ ex, onLocalVideo }) {
@@ -18,7 +18,7 @@ export default function ExerciseDemo({ ex, onLocalVideo }) {
           </figure>
         )}
         <div className="demo-info">
-          <p className="demo-dose">{ex.kind === 'cardio' ? ex.reps : `${ex.sets ?? ex.base ?? 3} × ${ex.reps}`}{ex.rest ? `, rest ${ex.rest} s` : ''}</p>
+          <p className="demo-dose">{dose(ex)}{ex.rest ? `, rest ${ex.rest} s` : ''}</p>
           <ol className="cue-list">
             {ex.cues.map((c, i) => <li key={c}><span className="cue-num">{i + 1}</span>{c}</li>)}
           </ol>

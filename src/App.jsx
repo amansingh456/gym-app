@@ -37,7 +37,15 @@ export default function App() {
     startWeight: PROFILE.startWeight,
     goalWeight: PROFILE.goalWeight,
   }));
-  const [habits, setHabits] = useStored('cut8.habits', DEFAULT_HABITS);
+  // v2 adds the daily plank + kegels habit. Custom habits from the old list carry over.
+  const [habits, setHabits] = useStored('cut8.habits.v2', () => {
+    try {
+      const old = JSON.parse(localStorage.getItem('cut8.habits') || '[]');
+      return [...DEFAULT_HABITS, ...old.filter((h) => h.group === 'Custom')];
+    } catch {
+      return DEFAULT_HABITS;
+    }
+  });
   const [logs, setLogs] = useStored('cut8.log', {});
   const [weights, setWeights] = useStored('cut8.weights', []);
   const [modal, setModal] = useState(null);
